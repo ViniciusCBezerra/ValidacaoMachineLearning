@@ -3,6 +3,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split,cross_validate,KFold,StratifiedKFold
 from sklearn.metrics import confusion_matrix,ConfusionMatrixDisplay,accuracy_score,precision_score,recall_score,f1_score,RocCurveDisplay,roc_auc_score,PrecisionRecallDisplay,average_precision_score,classification_report
 from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as imbpipeline
 
 
 def intervalo_conf(resultados):
@@ -53,9 +54,9 @@ PrecisionRecallDisplay.from_predictions(y_val,y_previsto,name='√Årvore de Decis√
 oversample = SMOTE()
 x_balanceado,y_balanceado = oversample.fit_resample(x,y)
 modelo = DecisionTreeClassifier()
+pipeline = imbpipeline([('oversample',SMOTE()),('arvore',modelo)])
 
 skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=5)
-cv_resultados = cross_validate(arvore, x_balanceado, y_balanceado, cv = skf,scoring='recall')
+cv_resultados = cross_validate(pipeline,x, y, cv = skf,scoring='recall')
 
-intervalo_conf(cv_resultados)
-
+print(cv_resultados['test_score'].mean())
